@@ -1,0 +1,197 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Deploys 4 EC2 instances in 4 different VPCs and individual Security Groups"
+
+Parameters:
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: EC2 Key Pair for SSH access
+
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t3.micro
+      - t3.small
+    Description: EC2 Instance Type
+
+  AMIId:
+    Type: AWS::EC2::Image::Id
+    Default: ami-00399ec92321828f5  # Amazon Linux 2 in us-east-2
+    Description: AMI ID for EC2 instances
+
+  VPC1Id:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC1 ID
+  VPC2Id:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC2 ID
+  VPC3Id:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC3 ID
+  VPC4Id:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC4 ID
+
+  VPC1SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet for VPC1 Instance
+  VPC2SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet for VPC2 Instance
+  VPC3SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet for VPC3 Instance
+  VPC4SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet for VPC4 Instance
+
+Resources:
+  # Security Groups
+  SGVPC1:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP, SSH, ICMP in VPC1
+      VpcId: !Ref VPC1Id
+      SecurityGroupIngress:
+        - IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  SGVPC2:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP, SSH, ICMP in VPC2
+      VpcId: !Ref VPC2Id
+      SecurityGroupIngress:
+        - IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  SGVPC3:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP, SSH, ICMP in VPC3
+      VpcId: !Ref VPC3Id
+      SecurityGroupIngress:
+        - IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  SGVPC4:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP, SSH, ICMP in VPC4
+      VpcId: !Ref VPC4Id
+      SecurityGroupIngress:
+        - IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  # EC2 Instances
+  InstanceVPC1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      ImageId: !Ref AMIId
+      NetworkInterfaces:
+        - SubnetId: !Ref VPC1SubnetId
+          DeviceIndex: 0
+          AssociatePublicIpAddress: true
+          DeleteOnTermination: true
+          GroupSet:
+            - !Ref SGVPC1
+      
+
+  InstanceVPC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      ImageId: !Ref AMIId
+      NetworkInterfaces:
+        - SubnetId: !Ref VPC2SubnetId
+          DeviceIndex: 0
+          AssociatePublicIpAddress: true
+          DeleteOnTermination: true
+          GroupSet:
+            - !Ref SGVPC2
+      
+
+  InstanceVPC3:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      ImageId: !Ref AMIId
+      NetworkInterfaces:
+        - SubnetId: !Ref VPC3SubnetId
+          DeviceIndex: 0
+          AssociatePublicIpAddress: true
+          DeleteOnTermination: true
+          GroupSet:
+            - !Ref SGVPC3
+      
+
+  InstanceVPC4:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      ImageId: !Ref AMIId
+      NetworkInterfaces:
+        - SubnetId: !Ref VPC4SubnetId
+          DeviceIndex: 0
+          AssociatePublicIpAddress: true
+          DeleteOnTermination: true
+          GroupSet:
+            - !Ref SGVPC4
+      
+
+Outputs:
+  InstanceVPC1Id:
+    Value: !Ref InstanceVPC1
+  InstanceVPC2Id:
+    Value: !Ref InstanceVPC2
+  InstanceVPC3Id:
+    Value: !Ref InstanceVPC3
+  InstanceVPC4Id:
+    Value: !Ref InstanceVPC4
