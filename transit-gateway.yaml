@@ -1,0 +1,188 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Creates a Transit Gateway, attaches 4 VPCs, and updates route tables"
+
+Parameters:
+  VPC1Id:
+    Type: String
+  VPC2Id:
+    Type: String
+  VPC3Id:
+    Type: String
+  VPC4Id:
+    Type: String
+
+  VPC1RouteTableId:
+    Type: String
+  VPC2RouteTableId:
+    Type: String
+  VPC3RouteTableId:
+    Type: String
+  VPC4RouteTableId:
+    Type: String
+
+  VPC1Cidr:
+    Type: String
+  VPC2Cidr:
+    Type: String
+  VPC3Cidr:
+    Type: String
+  VPC4Cidr:
+    Type: String
+
+  VPC1SubnetId:
+    Type: String
+  VPC2SubnetId:
+    Type: String
+  VPC3SubnetId:
+    Type: String
+  VPC4SubnetId:
+    Type: String
+
+Resources:
+
+  TransitGateway:
+    Type: AWS::EC2::TransitGateway
+    Properties:
+      Description: VPC-to-VPC TGW
+      AutoAcceptSharedAttachments: enable
+      DefaultRouteTableAssociation: enable
+      DefaultRouteTablePropagation: enable
+      DnsSupport: enable
+      VpnEcmpSupport: enable
+
+  TGWAttachVPC1:
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties:
+      TransitGatewayId: !Ref TransitGateway
+      VpcId: !Ref VPC1Id
+      SubnetIds:
+        - !Ref VPC1SubnetId
+
+  TGWAttachVPC2:
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties:
+      TransitGatewayId: !Ref TransitGateway
+      VpcId: !Ref VPC2Id
+      SubnetIds:
+        - !Ref VPC2SubnetId
+
+  TGWAttachVPC3:
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties:
+      TransitGatewayId: !Ref TransitGateway
+      VpcId: !Ref VPC3Id
+      SubnetIds:
+        - !Ref VPC3SubnetId
+
+  TGWAttachVPC4:
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties:
+      TransitGatewayId: !Ref TransitGateway
+      VpcId: !Ref VPC4Id
+      SubnetIds:
+        - !Ref VPC4SubnetId
+
+  # ROUTES VPC1
+  VPC1ToVPC2:
+    Type: AWS::EC2::Route
+    DependsOn: TGWAttachVPC2
+    Properties:
+      RouteTableId: !Ref VPC1RouteTableId
+      DestinationCidrBlock: !Ref VPC2Cidr
+      TransitGatewayId: !Ref TransitGateway
+
+  VPC1ToVPC3:
+    Type: AWS::EC2::Route
+    DependsOn: TGWAttachVPC3
+    Properties:
+      RouteTableId: !Ref VPC1RouteTableId
+      DestinationCidrBlock: !Ref VPC3Cidr
+      TransitGatewayId: !Ref TransitGateway
+
+  VPC1ToVPC4:
+    Type: AWS::EC2::Route
+    DependsOn: TGWAttachVPC4
+    Properties:
+      RouteTableId: !Ref VPC1RouteTableId
+      DestinationCidrBlock: !Ref VPC4Cidr
+      TransitGatewayId: !Ref TransitGateway
+
+  # ROUTES VPC2
+  VPC2ToVPC1:
+    Type: AWS::EC2::Route
+    DependsOn: TGWAttachVPC1
+    Properties:
+      RouteTableId: !Ref VPC2RouteTableId
+      DestinationCidrBlock: !Ref VPC1Cidr
+      TransitGatewayId: !Ref TransitGateway
+
+  VPC2ToVPC3:
+    Type: AWS::EC2::Route
+    DependsOn: TGWAttachVPC3
+    Properties:
+      RouteTableId: !Ref VPC2RouteTableId
+      DestinationCidrBlock: !Ref VPC3Cidr
+      TransitGatewayId: !Ref TransitGateway
+
+  VPC2ToVPC4:
+    Type: AWS::EC2::Route
+    DependsOn: TGWAttachVPC4
+    Properties:
+      RouteTableId: !Ref VPC2RouteTableId
+      DestinationCidrBlock: !Ref VPC4Cidr
+      TransitGatewayId: !Ref TransitGateway
+
+  # ROUTES VPC3
+  VPC3ToVPC1:
+    Type: AWS::EC2::Route
+    DependsOn: TGWAttachVPC1
+    Properties:
+      RouteTableId: !Ref VPC3RouteTableId
+      DestinationCidrBlock: !Ref VPC1Cidr
+      TransitGatewayId: !Ref TransitGateway
+
+  VPC3ToVPC2:
+    Type: AWS::EC2::Route
+    DependsOn: TGWAttachVPC2
+    Properties:
+      RouteTableId: !Ref VPC3RouteTableId
+      DestinationCidrBlock: !Ref VPC2Cidr
+      TransitGatewayId: !Ref TransitGateway
+
+  VPC3ToVPC4:
+    Type: AWS::EC2::Route
+    DependsOn: TGWAttachVPC4
+    Properties:
+      RouteTableId: !Ref VPC3RouteTableId
+      DestinationCidrBlock: !Ref VPC4Cidr
+      TransitGatewayId: !Ref TransitGateway
+
+  # ROUTES VPC4
+  VPC4ToVPC1:
+    Type: AWS::EC2::Route
+    DependsOn: TGWAttachVPC1
+    Properties:
+      RouteTableId: !Ref VPC4RouteTableId
+      DestinationCidrBlock: !Ref VPC1Cidr
+      TransitGatewayId: !Ref TransitGateway
+
+  VPC4ToVPC2:
+    Type: AWS::EC2::Route
+    DependsOn: TGWAttachVPC2
+    Properties:
+      RouteTableId: !Ref VPC4RouteTableId
+      DestinationCidrBlock: !Ref VPC2Cidr
+      TransitGatewayId: !Ref TransitGateway
+
+  VPC4ToVPC3:
+    Type: AWS::EC2::Route
+    DependsOn: TGWAttachVPC3
+    Properties:
+      RouteTableId: !Ref VPC4RouteTableId
+      DestinationCidrBlock: !Ref VPC3Cidr
+      TransitGatewayId: !Ref TransitGateway
+
+Outputs:
+  TransitGatewayId:
+    Description: The ID of the created Transit Gateway
+    Value: !Ref TransitGateway

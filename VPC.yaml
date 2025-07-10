@@ -1,0 +1,302 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Creates 4 VPCs with 2 public subnets each, Internet Gateways, and parameterized CIDRs"
+
+Parameters:
+  # VPC CIDRs
+  Vpc1Cidr:
+    Type: String
+    Default: 10.0.0.0/16
+  Vpc2Cidr:
+    Type: String
+    Default: 12.0.0.0/16
+  Vpc3Cidr:
+    Type: String
+    Default: 13.0.0.0/16
+  Vpc4Cidr:
+    Type: String
+    Default: 14.0.0.0/16
+
+  # VPC1 Subnet CIDRs
+  Vpc1Subnet1Cidr:
+    Type: String
+    Default: 10.0.1.0/24
+  Vpc1Subnet2Cidr:
+    Type: String
+    Default: 10.0.2.0/24
+
+  # VPC2 Subnet CIDRs
+  Vpc2Subnet1Cidr:
+    Type: String
+    Default: 12.0.1.0/24
+  Vpc2Subnet2Cidr:
+    Type: String
+    Default: 12.0.2.0/24
+
+  # VPC3 Subnet CIDRs
+  Vpc3Subnet1Cidr:
+    Type: String
+    Default: 13.0.1.0/24
+  Vpc3Subnet2Cidr:
+    Type: String
+    Default: 13.0.2.0/24
+
+  # VPC4 Subnet CIDRs
+  Vpc4Subnet1Cidr:
+    Type: String
+    Default: 14.0.1.0/24
+  Vpc4Subnet2Cidr:
+    Type: String
+    Default: 14.0.2.0/24
+
+Resources:
+
+#############################
+# VPCs and IGWs
+#############################
+  VPC1:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref Vpc1Cidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: [{ Key: Name, Value: VPC-1 }]
+
+  VPC1IGW:
+    Type: AWS::EC2::InternetGateway
+
+  VPC1IGWAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC1
+      InternetGatewayId: !Ref VPC1IGW
+
+  VPC2:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref Vpc2Cidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: [{ Key: Name, Value: VPC-2 }]
+
+  VPC2IGW:
+    Type: AWS::EC2::InternetGateway
+
+  VPC2IGWAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC2
+      InternetGatewayId: !Ref VPC2IGW
+
+  VPC3:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref Vpc3Cidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: [{ Key: Name, Value: VPC-3 }]
+
+  VPC3IGW:
+    Type: AWS::EC2::InternetGateway
+
+  VPC3IGWAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC3
+      InternetGatewayId: !Ref VPC3IGW
+
+  VPC4:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref Vpc4Cidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: [{ Key: Name, Value: VPC-4 }]
+
+  VPC4IGW:
+    Type: AWS::EC2::InternetGateway
+
+  VPC4IGWAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC4
+      InternetGatewayId: !Ref VPC4IGW
+
+
+
+  # VPC1 Subnets
+  VPC1Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC1
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: !Ref Vpc1Subnet1Cidr
+      MapPublicIpOnLaunch: true
+
+  VPC1Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC1
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: !Ref Vpc1Subnet2Cidr
+      MapPublicIpOnLaunch: true
+
+  VPC1RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC1
+
+  VPC1DefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPC1IGWAttach
+    Properties:
+      RouteTableId: !Ref VPC1RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref VPC1IGW
+
+  VPC1Subnet1Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref VPC1Subnet1
+      RouteTableId: !Ref VPC1RouteTable
+
+  VPC1Subnet2Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref VPC1Subnet2
+      RouteTableId: !Ref VPC1RouteTable
+
+  # VPC2 Subnets
+  VPC2Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC2
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: !Ref Vpc2Subnet1Cidr
+      MapPublicIpOnLaunch: true
+
+  VPC2Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC2
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: !Ref Vpc2Subnet2Cidr
+      MapPublicIpOnLaunch: true
+
+  VPC2RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC2
+
+  VPC2DefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPC2IGWAttach
+    Properties:
+      RouteTableId: !Ref VPC2RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref VPC2IGW
+
+  VPC2Subnet1Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref VPC2Subnet1
+      RouteTableId: !Ref VPC2RouteTable
+
+  VPC2Subnet2Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref VPC2Subnet2
+      RouteTableId: !Ref VPC2RouteTable
+
+  # VPC3 Subnets
+  VPC3Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC3
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: !Ref Vpc3Subnet1Cidr
+      MapPublicIpOnLaunch: true
+
+  VPC3Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC3
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: !Ref Vpc3Subnet2Cidr
+      MapPublicIpOnLaunch: true
+
+  VPC3RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC3
+
+  VPC3DefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPC3IGWAttach
+    Properties:
+      RouteTableId: !Ref VPC3RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref VPC3IGW
+
+  VPC3Subnet1Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref VPC3Subnet1
+      RouteTableId: !Ref VPC3RouteTable
+
+  VPC3Subnet2Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref VPC3Subnet2
+      RouteTableId: !Ref VPC3RouteTable
+
+  # VPC4 Subnets
+  VPC4Subnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC4
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: !Ref Vpc4Subnet1Cidr
+      MapPublicIpOnLaunch: true
+
+  VPC4Subnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC4
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: !Ref Vpc4Subnet2Cidr
+      MapPublicIpOnLaunch: true
+
+  VPC4RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC4
+
+  VPC4DefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPC4IGWAttach
+    Properties:
+      RouteTableId: !Ref VPC4RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref VPC4IGW
+
+  VPC4Subnet1Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref VPC4Subnet1
+      RouteTableId: !Ref VPC4RouteTable
+
+  VPC4Subnet2Assoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref VPC4Subnet2
+      RouteTableId: !Ref VPC4RouteTable
+
+Outputs:
+  VPC1Id:
+    Value: !Ref VPC1
+  VPC2Id:
+    Value: !Ref VPC2
+  VPC3Id:
+    Value: !Ref VPC3
+  VPC4Id:
+    Value: !Ref VPC4
